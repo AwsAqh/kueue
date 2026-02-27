@@ -19,7 +19,8 @@ package fairsharing
 import (
 	"context"
 	"testing"
-
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	featuregatetesting "k8s.io/component-base/featuregate/testing"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/rest"
@@ -76,7 +77,12 @@ func managerAndSchedulerSetup(admissionFairSharing *config.AdmissionFairSharing)
 		err := indexer.Setup(ctx, mgr.GetFieldIndexer())
 		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-		_ = features.SetEnable(features.AdmissionFairSharing, true)
+		featuregatetesting.SetFeatureGateDuringTest(
+			ginkgo.GinkgoT(),
+			utilfeature.DefaultFeatureGate,
+			features.AdmissionFairSharing,
+			true,
+		)
 		cCache := schdcache.New(mgr.GetClient(), schdcache.WithFairSharing(fairsharing.Enabled(fairSharing)), schdcache.WithAdmissionFairSharing(admissionFairSharing))
 		queues := util.NewManagerForIntegrationTests(ctx, mgr.GetClient(), cCache, qcache.WithAdmissionFairSharing(admissionFairSharing))
 
