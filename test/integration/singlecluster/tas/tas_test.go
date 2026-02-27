@@ -20,7 +20,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
-
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	featuregatetesting "k8s.io/component-base/featuregate/testing"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -2356,7 +2357,12 @@ var _ = ginkgo.Describe("Topology Aware Scheduling", ginkgo.Ordered, func() {
 				localQueue = utiltestingapi.MakeLocalQueue("local-queue", ns.Name).ClusterQueue(clusterQueue.Name).Obj()
 				util.MustCreate(ctx, k8sClient, localQueue)
 
-				_ = features.SetEnable(features.TASBalancedPlacement, true)
+				featuregatetesting.SetFeatureGateDuringTest(
+				    ginkgo.GinkgoT(),
+				    utilfeature.DefaultFeatureGate,
+				    features.TASBalancedPlacement,
+				    true,
+				)
 			})
 
 			ginkgo.AfterEach(func() {
@@ -2370,7 +2376,7 @@ var _ = ginkgo.Describe("Topology Aware Scheduling", ginkgo.Ordered, func() {
 					util.ExpectObjectToBeDeleted(ctx, k8sClient, &node, true)
 				}
 
-				_ = features.SetEnable(features.TASBalancedPlacement, false)
+				
 			})
 
 			ginkgo.It("place the workers evenly on selected nodes", func() {
