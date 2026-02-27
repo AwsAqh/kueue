@@ -17,9 +17,10 @@ limitations under the License.
 package multikueue
 
 import (
+	featuregatetesting "k8s.io/component-base/featuregate/testing"
 	"context"
 	"time"
-
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	batchv1 "k8s.io/api/batch/v1"
@@ -39,6 +40,7 @@ import (
 	utiltestingapi "sigs.k8s.io/kueue/pkg/util/testing/v1beta2"
 	testingjob "sigs.k8s.io/kueue/pkg/util/testingjobs/job"
 	"sigs.k8s.io/kueue/test/util"
+	
 )
 
 var _ = ginkgo.Describe("MultiKueue with DRA", ginkgo.Label("area:multikueue", "feature:multikueue", "feature:dra"), ginkgo.Ordered, ginkgo.ContinueOnFailure, func() {
@@ -64,7 +66,12 @@ var _ = ginkgo.Describe("MultiKueue with DRA", ginkgo.Label("area:multikueue", "
 	)
 
 	ginkgo.BeforeAll(func() {
-		gomega.Expect(features.SetEnable(features.DynamicResourceAllocation, true)).To(gomega.Succeed())
+		featuregatetesting.SetFeatureGateDuringTest(
+		    ginkgo.GinkgoT(),
+		    utilfeature.DefaultFeatureGate,
+		    features.DynamicResourceAllocation,
+		    true,
+		)
 
 		managerTestCluster.fwk.StartManager(managerTestCluster.ctx, managerTestCluster.cfg, func(ctx context.Context, mgr manager.Manager) {
 			managerAndMultiKueueSetup(ctx, mgr, 2*time.Second, defaultEnabledIntegrations, config.MultiKueueDispatcherModeAllAtOnce)
@@ -73,7 +80,7 @@ var _ = ginkgo.Describe("MultiKueue with DRA", ginkgo.Label("area:multikueue", "
 
 	ginkgo.AfterAll(func() {
 		managerTestCluster.fwk.StopManager(managerTestCluster.ctx)
-		gomega.Expect(features.SetEnable(features.DynamicResourceAllocation, false)).To(gomega.Succeed())
+		
 	})
 
 	ginkgo.BeforeEach(func() {
