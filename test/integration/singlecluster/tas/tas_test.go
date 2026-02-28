@@ -2357,12 +2357,7 @@ var _ = ginkgo.Describe("Topology Aware Scheduling", ginkgo.Ordered, func() {
 				localQueue = utiltestingapi.MakeLocalQueue("local-queue", ns.Name).ClusterQueue(clusterQueue.Name).Obj()
 				util.MustCreate(ctx, k8sClient, localQueue)
 
-				featuregatetesting.SetFeatureGateDuringTest(
-				    ginkgo.GinkgoT(),
-				    utilfeature.DefaultFeatureGate,
-				    features.TASBalancedPlacement,
-				    true,
-				)
+				ffeatures.SetFeatureGateDuringTest(ginkgo.GinkgoT(), features.DynamicResourceAllocation, true)
 			})
 
 			ginkgo.AfterEach(func() {
