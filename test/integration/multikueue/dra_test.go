@@ -66,12 +66,7 @@ var _ = ginkgo.Describe("MultiKueue with DRA", ginkgo.Label("area:multikueue", "
 	)
 
 	ginkgo.BeforeAll(func() {
-		featuregatetesting.SetFeatureGateDuringTest(
-		    ginkgo.GinkgoT(),
-		    utilfeature.DefaultFeatureGate,
-		    features.DynamicResourceAllocation,
-		    true,
-		)
+		features.SetFeatureGateDuringTest(ginkgo.GinkgoT(), features.DynamicResourceAllocation, true)
 
 		managerTestCluster.fwk.StartManager(managerTestCluster.ctx, managerTestCluster.cfg, func(ctx context.Context, mgr manager.Manager) {
 			managerAndMultiKueueSetup(ctx, mgr, 2*time.Second, defaultEnabledIntegrations, config.MultiKueueDispatcherModeAllAtOnce)
